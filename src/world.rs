@@ -18,6 +18,7 @@ impl World {
         }
         World { w: width, h: world.len(), field: world }
     }
+    #[allow(dead_code)]
     pub fn from_random(w: usize, h: usize) -> World {
         use rand::{thread_rng, Rng};
         let mut rng = thread_rng();

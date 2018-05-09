@@ -1,7 +1,7 @@
 use std::io::{BufRead, Write};
 use world::World;
 
-struct Befunge<'w, 'io> {
+pub struct Befunge<'w, 'io> {
     world: &'w mut World,
     stack: Vec<u8>,
     direction: Direction,
@@ -13,7 +13,7 @@ struct Befunge<'w, 'io> {
 }
 
 #[derive(Debug)]
-enum Direction {
+pub enum Direction {
     Up,
     Down,
     Left,

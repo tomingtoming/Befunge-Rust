@@ -3,7 +3,7 @@ use world::World;
 
 pub struct Befunge<'w, 'io> {
     world: &'w mut World,
-    stack: Vec<u8>,
+    stack: Vec<i64>,
     direction: Direction,
     x: usize,
     y: usize,
@@ -138,7 +138,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
                         // Pop value and output as ASCII character
                         ',' => {
                             let value = self.stack.pop().unwrap_or(0);
-                            write!(&mut self.write, "{}", value as char).unwrap();
+                            write!(&mut self.write, "{}", value as u8 as char).unwrap();
                         }
                         // Bridge: Skip next cell
                         '#' => self.forward(),
@@ -147,14 +147,14 @@ impl<'w, 'io> Befunge<'w, 'io> {
                             let y = self.stack.pop().unwrap_or(0);
                             let x = self.stack.pop().unwrap_or(0);
                             let v = self.stack.pop().unwrap_or(0);
-                            self.world.set(x as usize, y as usize, v); // TODO: Change position to relative
+                            self.world.set(x as usize, y as usize, v as u8); // TODO: Change position to relative
                         }
                         // A "get" call (a way to retrieve data in storage). Pop y and x, then push ASCII value of the character at that position in the program
                         'g' => {
                             let y = self.stack.pop().unwrap_or(0);
                             let x = self.stack.pop().unwrap_or(0);
                             let v = self.world.get(x as usize, y as usize);
-                            self.stack.push(v); // TODO: Change position to relative
+                            self.stack.push(v as i64); // TODO: Change position to relative
                         }
                         // Ask user for a number and push it
                         '&' => {
@@ -173,7 +173,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
                         '~' => {
                             let mut buf: [u8; 1] = [0];
                             match self.read.read(&mut buf) {
-                                Ok(_n) => self.stack.push(buf[0]),
+                                Ok(_n) => self.stack.push(buf[0] as i64),
                                 Err(_e) => (),
                             }
                         }
@@ -184,7 +184,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
                 Mode::AsciiPush => {
                     match self.world.get(self.x, self.y) as char {
                         '"' => self.mode = Mode::Interpret,
-                        c => self.stack.push(c as u8),
+                        c => self.stack.push(c as i64),
                     }
                 }
             }
@@ -238,6 +238,23 @@ mod tests {
     }
 
     #[test]
+    fn factorial_of_5() {
+        use super::{Befunge, World, Direction};
+        use std::io;
+
+        let read = Vec::new();
+        let mut buf_read = io::BufReader::new(&read[..]);
+        let mut write = Vec::new();
+        let mut world = World::from_source_string("5 100p:v\nv *g00:_00g.@\n>00p1-:^");
+        {
+            let mut befunge = Befunge::new(&mut world, 0, 0, Direction::Right, &mut buf_read, &mut write);
+            befunge.run();
+            assert_eq!(befunge.stack, [0]);
+        }
+        assert_eq!(String::from_utf8_lossy(&write[..]), "120 ");
+    }
+
+    #[test]
     fn control_commands() {
         use super::{Befunge, World, Direction};
         use std::io;
@@ -276,10 +293,10 @@ mod tests {
         let read = Vec::new();
         let mut buf_read = io::BufReader::new(&read[..]);
         let mut write = Vec::new();
-        let mut world = World::from_source_string("98+92-73*92/83%@");
+        let mut world = World::from_source_string("09-9*9*98+92-73*92/83%@");
         let mut befunge = Befunge::new(&mut world, 0, 0, Direction::Right, &mut buf_read, &mut write);
         befunge.run();
-        assert_eq!(befunge.stack, [17, 7, 21, 4, 2]);
+        assert_eq!(befunge.stack, [-729, 17, 7, 21, 4, 2]);
     }
 
     #[test]
@@ -332,7 +349,7 @@ mod tests {
         use super::{Befunge, World, Direction};
         use std::io;
 
-        let read = Vec::from("51\n7\n".as_bytes());
+        let read = Vec::from("-205\n7\n".as_bytes());
         let mut buf_read = io::BufReader::new(&read[..]);
         let mut write = Vec::new();
         let mut world = World::from_source_string("&~.,@");

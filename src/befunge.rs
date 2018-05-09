@@ -160,7 +160,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
                         '&' => {
                             let mut line = String::new();
                             match self.read.read_line(&mut line) {
-                                Ok(i) => {
+                                Ok(_) => {
                                     match line.trim().parse() {
                                         Ok(n) => self.stack.push(n),
                                         Err(e) => panic!(e),

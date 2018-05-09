@@ -31,6 +31,7 @@ impl World {
         }
         World { w, h, field: world }
     }
+    #[allow(dead_code)]
     pub fn println(&self) {
         for line in &self.field {
             for elem in line {

@@ -8,8 +8,8 @@ pub struct Befunge<'w, 'io> {
     x: usize,
     y: usize,
     mode: Mode,
-    read: &'io mut BufRead,
-    write: &'io mut Write,
+    read: &'io mut dyn BufRead,
+    write: &'io mut dyn Write,
 }
 
 #[derive(Debug)]
@@ -26,7 +26,7 @@ enum Mode {
 }
 
 impl<'w, 'io> Befunge<'w, 'io> {
-    pub fn new(world: &'w mut World, x: usize, y: usize, direction: Direction, read: &'io mut BufRead, write: &'io mut Write) -> Befunge<'w, 'io> {
+    pub fn new(world: &'w mut World, x: usize, y: usize, direction: Direction, read: &'io mut dyn BufRead, write: &'io mut dyn Write) -> Befunge<'w, 'io> {
         Befunge { world, stack: Vec::new(), direction, x, y, mode: Mode::Interpret, read, write }
     }
     pub fn run(&mut self) {

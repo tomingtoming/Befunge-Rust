@@ -8,7 +8,9 @@ impl World {
     pub fn from_source_string(source: &str) -> World {
         let mut world: Vec<Vec<u8>> = Vec::new();
         let lines: Vec<&str> = source.split('\n').collect();
-        let width = lines.iter().fold(0, |i, s| if i < s.len() { s.len() } else { i });
+        let width = lines
+            .iter()
+            .fold(0, |i, s| if i < s.len() { s.len() } else { i });
         for line in lines {
             let mut belt = Vec::from(line);
             while belt.len() != width {
@@ -16,7 +18,11 @@ impl World {
             }
             world.push(belt)
         }
-        World { w: width, h: world.len(), field: world }
+        World {
+            w: width,
+            h: world.len(),
+            field: world,
+        }
     }
     #[allow(dead_code)]
     pub fn from_random(w: usize, h: usize) -> World {
@@ -59,7 +65,8 @@ mod tests {
 
     #[test]
     fn hello_world_program() {
-        let src = ">              v\nv  ,,,,,\"Hello\"<\n>48*,          v\nv,,,,,,\"World!\"<\n>25*,@";
+        let src =
+            ">              v\nv  ,,,,,\"Hello\"<\n>48*,          v\nv,,,,,,\"World!\"<\n>25*,@";
         let world = World::from_source_string(src);
         assert_eq!(world.get(0, 0) as char, '>');
         assert_eq!(world.get(15, 0) as char, 'v');

@@ -264,11 +264,12 @@ impl<'w, 'io> Befunge<'w, 'io> {
 
 #[cfg(test)]
 mod tests {
+
+    use super::{Befunge, Direction, World};
+    use std::io;
+
     #[test]
     fn hello_world_program1() {
-        use super::{Befunge, Direction, World};
-        use std::io;
-
         let src =
             ">              v\nv  ,,,,,\"Hello\"<\n>48*,          v\nv,,,,,,\"World!\"<\n>25*,@";
         let read = Vec::new();
@@ -291,9 +292,6 @@ mod tests {
 
     #[test]
     fn hello_world_program2() {
-        use super::{Befunge, Direction, World};
-        use std::io;
-
         let src = "v @_       v\n>0\"!dlroW\"v\nv  :#     <\n>\" ,olleH\" v\n   ^       <";
         let read = Vec::new();
         let mut buf_read = io::BufReader::new(&read[..]);
@@ -315,9 +313,6 @@ mod tests {
 
     #[test]
     fn factorial_of_5() {
-        use super::{Befunge, Direction, World};
-        use std::io;
-
         let read = Vec::new();
         let mut buf_read = io::BufReader::new(&read[..]);
         let mut write = Vec::new();
@@ -339,9 +334,6 @@ mod tests {
 
     #[test]
     fn control_commands() {
-        use super::{Befunge, Direction, World};
-        use std::io;
-
         let read = Vec::new();
         let mut buf_read = io::BufReader::new(&read[..]);
         let mut write = Vec::new();
@@ -360,9 +352,6 @@ mod tests {
 
     #[test]
     fn literal_commands() {
-        use super::{Befunge, Direction, World};
-        use std::io;
-
         let read = Vec::new();
         let mut buf_read = io::BufReader::new(&read[..]);
         let mut write = Vec::new();
@@ -387,9 +376,6 @@ mod tests {
 
     #[test]
     fn arithmetic_commands() {
-        use super::{Befunge, Direction, World};
-        use std::io;
-
         let read = Vec::new();
         let mut buf_read = io::BufReader::new(&read[..]);
         let mut write = Vec::new();
@@ -408,9 +394,6 @@ mod tests {
 
     #[test]
     fn logical_operation_commands() {
-        use super::{Befunge, Direction, World};
-        use std::io;
-
         let read = Vec::new();
         let mut buf_read = io::BufReader::new(&read[..]);
         let mut write = Vec::new();
@@ -429,9 +412,6 @@ mod tests {
 
     #[test]
     fn stack_operation_commands() {
-        use super::{Befunge, Direction, World};
-        use std::io;
-
         let read = Vec::new();
         let mut buf_read = io::BufReader::new(&read[..]);
         let mut write = Vec::new();
@@ -450,9 +430,6 @@ mod tests {
 
     #[test]
     fn memory_operation_commands() {
-        use super::{Befunge, Direction, World};
-        use std::io;
-
         let read = Vec::new();
         let mut buf_read = io::BufReader::new(&read[..]);
         let mut write = Vec::new();
@@ -474,9 +451,6 @@ mod tests {
 
     #[test]
     fn io_commands() {
-        use super::{Befunge, Direction, World};
-        use std::io;
-
         let read = Vec::from("-205\n7\n".as_bytes());
         let mut buf_read = io::BufReader::new(&read[..]);
         let mut write = Vec::new();

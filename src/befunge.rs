@@ -265,16 +265,16 @@ impl<'w, 'io> Befunge<'w, 'io> {
 
 #[cfg(test)]
 mod tests {
-    use std::io;
 
     use super::{Befunge, Direction, World};
+    use std::io::BufReader;
 
     #[test]
     fn hello_world_program1() {
         let src =
             ">              v\nv  ,,,,,\"Hello\"<\n>48*,          v\nv,,,,,,\"World!\"<\n>25*,@";
         let read = Vec::new();
-        let mut buf_read = io::BufReader::new(&read[..]);
+        let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
         let mut world = World::from_source_string(src);
         {
@@ -295,7 +295,7 @@ mod tests {
     fn hello_world_program2() {
         let src = "v @_       v\n>0\"!dlroW\"v\nv  :#     <\n>\" ,olleH\" v\n   ^       <";
         let read = Vec::new();
-        let mut buf_read = io::BufReader::new(&read[..]);
+        let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
         let mut world = World::from_source_string(src);
         {
@@ -315,7 +315,7 @@ mod tests {
     #[test]
     fn factorial_of_5() {
         let read = Vec::new();
-        let mut buf_read = io::BufReader::new(&read[..]);
+        let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
         let mut world = World::from_source_string("5 100p:v\nv *g00:_00g.@\n>00p1-:^");
         {
@@ -336,7 +336,7 @@ mod tests {
     #[test]
     fn control_commands() {
         let read = Vec::new();
-        let mut buf_read = io::BufReader::new(&read[..]);
+        let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
         let mut world = World::from_source_string("^    _| 3\n0#@07|5 >\n<@?@# _ v\n1 @     2");
         let mut befunge = Befunge::new(
@@ -354,7 +354,7 @@ mod tests {
     #[test]
     fn literal_commands() {
         let read = Vec::new();
-        let mut buf_read = io::BufReader::new(&read[..]);
+        let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
         let mut world = World::from_source_string(r#"01234"   "56789@"#);
         {
@@ -378,7 +378,7 @@ mod tests {
     #[test]
     fn arithmetic_commands() {
         let read = Vec::new();
-        let mut buf_read = io::BufReader::new(&read[..]);
+        let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
         let mut world = World::from_source_string("09-9*9*98+92-73*92/83%@");
         let mut befunge = Befunge::new(
@@ -396,7 +396,7 @@ mod tests {
     #[test]
     fn logical_operation_commands() {
         let read = Vec::new();
-        let mut buf_read = io::BufReader::new(&read[..]);
+        let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
         let mut world = World::from_source_string("8!0!12`21`@");
         let mut befunge = Befunge::new(
@@ -414,7 +414,7 @@ mod tests {
     #[test]
     fn stack_operation_commands() {
         let read = Vec::new();
-        let mut buf_read = io::BufReader::new(&read[..]);
+        let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
         let mut world = World::from_source_string(r#"73:6\$@"#);
         let mut befunge = Befunge::new(
@@ -432,7 +432,7 @@ mod tests {
     #[test]
     fn memory_operation_commands() {
         let read = Vec::new();
-        let mut buf_read = io::BufReader::new(&read[..]);
+        let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
         let mut world = World::from_source_string("00g1+70p@");
         let mut befunge = Befunge::new(
@@ -451,7 +451,7 @@ mod tests {
     #[test]
     fn io_commands() {
         let read = Vec::from("-205\n7\n".as_bytes());
-        let mut buf_read = io::BufReader::new(&read[..]);
+        let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
         let mut world = World::from_source_string("&~.,@");
         let mut befunge = Befunge::new(

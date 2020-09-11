@@ -1,4 +1,5 @@
 use std::io::{BufRead, Write};
+
 use world::World;
 
 pub struct Befunge<'w, 'io> {
@@ -264,9 +265,9 @@ impl<'w, 'io> Befunge<'w, 'io> {
 
 #[cfg(test)]
 mod tests {
+    use std::io;
 
     use super::{Befunge, Direction, World};
-    use std::io;
 
     #[test]
     fn hello_world_program1() {
@@ -434,18 +435,16 @@ mod tests {
         let mut buf_read = io::BufReader::new(&read[..]);
         let mut write = Vec::new();
         let mut world = World::from_source_string("00g1+70p@");
-        {
-            let mut befunge = Befunge::new(
-                &mut world,
-                0,
-                0,
-                Direction::Right,
-                &mut buf_read,
-                &mut write,
-            );
-            befunge.run();
-            assert_eq!(befunge.stack, []);
-        }
+        let mut befunge = Befunge::new(
+            &mut world,
+            0,
+            0,
+            Direction::Right,
+            &mut buf_read,
+            &mut write,
+        );
+        befunge.run();
+        assert_eq!(befunge.stack, []);
         assert_eq!(world.get(7, 0), '1' as u8);
     }
 
@@ -455,18 +454,16 @@ mod tests {
         let mut buf_read = io::BufReader::new(&read[..]);
         let mut write = Vec::new();
         let mut world = World::from_source_string("&~.,@");
-        {
-            let mut befunge = Befunge::new(
-                &mut world,
-                0,
-                0,
-                Direction::Right,
-                &mut buf_read,
-                &mut write,
-            );
-            befunge.run();
-            assert_eq!(befunge.stack, []);
-        }
+        let mut befunge = Befunge::new(
+            &mut world,
+            0,
+            0,
+            Direction::Right,
+            &mut buf_read,
+            &mut write,
+        );
+        befunge.run();
+        assert_eq!(befunge.stack, []);
         assert_eq!(String::from_utf8_lossy(&write[..]), "55 3");
     }
 }

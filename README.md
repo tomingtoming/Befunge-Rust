@@ -1,2 +1,2 @@
-# Befunge-Rust [![CircleCI](https://circleci.com/gh/tomingtoming/Befunge-Rust.svg?style=svg)](https://circleci.com/gh/tomingtoming/Befunge-Rust)
+# Befunge-Rust ![GitHub Actions](https://github.com/tomingtoming/Befunge-Rust/actions/workflows/rust.yml/badge.svg)
 Befunge interpreter implementation by Rust

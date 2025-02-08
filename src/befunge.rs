@@ -1,6 +1,6 @@
-use std::io::{BufRead, Write};
-use std::error::Error;
 use crate::world::World;
+use std::error::Error;
+use std::io::{BufRead, Write};
 
 pub struct Befunge<'w, 'io> {
     world: &'w mut World,

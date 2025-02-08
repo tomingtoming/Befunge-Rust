@@ -3,7 +3,7 @@ extern crate rand;
 use befunge::{Befunge, Direction};
 use std::env;
 use std::fs;
-use std::io;
+use std::io::{self, BufReader};
 use std::process;
 use world::World;
 
@@ -26,7 +26,8 @@ fn main() {
     };
 
     let mut world = World::from_source_string(&src);
-    let mut stdin = io::stdin();
+    let stdin = io::stdin();
+    let mut stdin_lock = BufReader::new(stdin.lock());
     let mut stdout = io::stdout();
     
     let mut befunge = Befunge::new(
@@ -34,7 +35,7 @@ fn main() {
         0,
         0,
         Direction::Right,
-        &mut stdin,
+        &mut stdin_lock,
         &mut stdout,
     );
 

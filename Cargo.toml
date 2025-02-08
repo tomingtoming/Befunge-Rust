@@ -2,6 +2,7 @@
 name = "befunge_rust"
 version = "1.0.0"
 authors = ["toming <tomingtoming@gmail.com>"]
+edition = "2021"
 
 [dependencies]
 rand = "0.5.0-pre.1"

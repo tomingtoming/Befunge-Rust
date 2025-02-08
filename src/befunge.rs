@@ -1,6 +1,6 @@
 use std::io::{BufRead, Write};
 use std::error::Error;
-use world::World;
+use crate::world::World;
 
 pub struct Befunge<'w, 'io> {
     world: &'w mut World,
@@ -128,12 +128,10 @@ impl<'w, 'io> Befunge<'w, 'io> {
                             } else {
                                 Direction::Down
                             }
+                        } else if rng.gen() {
+                            Direction::Left
                         } else {
-                            if rng.gen() {
-                                Direction::Left
-                            } else {
-                                Direction::Right
-                            }
+                            Direction::Right
                         }
                     }
                     // Pop a value; move right if value=0, left otherwise
@@ -264,8 +262,8 @@ impl<'w, 'io> Befunge<'w, 'io> {
 mod tests {
 
     use super::{Befunge, Direction, World};
-    use std::io::BufReader;
     use std::error::Error;
+    use std::io::BufReader;
 
     #[test]
     fn hello_world_program1() -> Result<(), Box<dyn Error>> {

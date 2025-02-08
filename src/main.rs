@@ -29,7 +29,7 @@ fn main() {
     let stdin = io::stdin();
     let mut stdin_lock = BufReader::new(stdin.lock());
     let mut stdout = io::stdout();
-    
+
     let mut befunge = Befunge::new(
         &mut world,
         0,

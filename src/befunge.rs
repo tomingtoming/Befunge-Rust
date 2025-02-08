@@ -1,5 +1,5 @@
 use std::io::{BufRead, Write};
-
+use std::error::Error;
 use world::World;
 
 pub struct Befunge<'w, 'io> {
@@ -46,7 +46,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
             write,
         }
     }
-    pub fn run(&mut self) {
+    pub fn run(&mut self) -> Result<(), Box<dyn Error>> {
         use rand::{thread_rng, Rng};
         let mut rng = thread_rng();
         loop {
@@ -86,7 +86,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
                         let a = self.stack.pop().unwrap_or(0);
                         let b = self.stack.pop().unwrap_or(0);
                         if a == 0 {
-                            return;
+                            return Ok(());
                         } else {
                             self.stack.push(b / a);
                         }
@@ -96,7 +96,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
                         let a = self.stack.pop().unwrap_or(0);
                         let b = self.stack.pop().unwrap_or(0);
                         if a == 0 {
-                            return;
+                            return Ok(());
                         } else {
                             self.stack.push(b % a);
                         }
@@ -175,12 +175,12 @@ impl<'w, 'io> Befunge<'w, 'io> {
                     // Pop value and output as an integer followed by a space
                     '.' => {
                         let value = self.stack.pop().unwrap_or(0);
-                        write!(&mut self.write, "{} ", value).unwrap();
+                        write!(&mut self.write, "{} ", value)?;
                     }
                     // Pop value and output as ASCII character
                     ',' => {
                         let value = self.stack.pop().unwrap_or(0);
-                        write!(&mut self.write, "{}", value as u8 as char).unwrap();
+                        write!(&mut self.write, "{}", char::from(value as u8))?;
                     }
                     // Bridge: Skip next cell
                     '#' => self.forward(),
@@ -201,29 +201,26 @@ impl<'w, 'io> Befunge<'w, 'io> {
                     // Ask user for a number and push it
                     '&' => {
                         let mut line = String::new();
-                        match self.read.read_line(&mut line) {
-                            Ok(_) => match line.trim().parse() {
-                                Ok(n) => self.stack.push(n),
-                                Err(e) => panic!(e),
-                            },
-                            Err(e) => panic!(e),
-                        }
+                        self.read.read_line(&mut line)?;
+                        let n = line.trim().parse()?;
+                        self.stack.push(n);
                     }
                     // Ask user for a character and push its ASCII value
                     '~' => {
                         let mut buf: [u8; 1] = [0];
-                        match self.read.read(&mut buf) {
-                            Ok(_n) => self.stack.push(buf[0] as i64),
-                            Err(_e) => (),
+                        if let Ok(n) = self.read.read(&mut buf) {
+                            if n > 0 {
+                                self.stack.push(i64::from(buf[0]));
+                            }
                         }
                     }
-                    '@' => return,
+                    '@' => return Ok(()),
                     ' ' => {}
                     _ => {}
                 },
                 Mode::AsciiPush => match self.world.get(self.x, self.y) as char {
                     '"' => self.mode = Mode::Interpret,
-                    c => self.stack.push(c as i64),
+                    c => self.stack.push(i64::from(c as u8)),
                 },
             }
             self.forward();
@@ -233,13 +230,13 @@ impl<'w, 'io> Befunge<'w, 'io> {
         match self.direction {
             Direction::Up => {
                 self.y = if self.y == 0 {
-                    self.world.h - 1
+                    self.world.height() - 1
                 } else {
                     self.y - 1
                 }
             }
             Direction::Down => {
-                self.y = if self.y + 1 == self.world.h {
+                self.y = if self.y + 1 == self.world.height() {
                     0
                 } else {
                     self.y + 1
@@ -247,13 +244,13 @@ impl<'w, 'io> Befunge<'w, 'io> {
             }
             Direction::Left => {
                 self.x = if self.x == 0 {
-                    self.world.w - 1
+                    self.world.width() - 1
                 } else {
                     self.x - 1
                 }
             }
             Direction::Right => {
-                self.x = if self.x + 1 == self.world.w {
+                self.x = if self.x + 1 == self.world.width() {
                     0
                 } else {
                     self.x + 1
@@ -268,9 +265,10 @@ mod tests {
 
     use super::{Befunge, Direction, World};
     use std::io::BufReader;
+    use std::error::Error;
 
     #[test]
-    fn hello_world_program1() {
+    fn hello_world_program1() -> Result<(), Box<dyn Error>> {
         let src =
             ">              v\nv  ,,,,,\"Hello\"<\n>48*,          v\nv,,,,,,\"World!\"<\n>25*,@";
         let read = Vec::new();
@@ -286,13 +284,14 @@ mod tests {
                 &mut buf_read,
                 &mut write,
             );
-            befunge.run()
+            befunge.run()?;
         }
         assert_eq!(String::from_utf8_lossy(&write[..]), "Hello World!\n");
+        Ok(())
     }
 
     #[test]
-    fn hello_world_program2() {
+    fn hello_world_program2() -> Result<(), Box<dyn Error>> {
         let src = "v @_       v\n>0\"!dlroW\"v\nv  :#     <\n>\" ,olleH\" v\n   ^       <";
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
@@ -307,13 +306,14 @@ mod tests {
                 &mut buf_read,
                 &mut write,
             );
-            befunge.run();
+            befunge.run()?;
         }
         assert_eq!(String::from_utf8_lossy(&write[..]), "Hello, World!");
+        Ok(())
     }
 
     #[test]
-    fn factorial_of_5() {
+    fn factorial_of_5() -> Result<(), Box<dyn Error>> {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
@@ -327,14 +327,15 @@ mod tests {
                 &mut buf_read,
                 &mut write,
             );
-            befunge.run();
+            befunge.run()?;
             assert_eq!(befunge.stack, [0]);
         }
         assert_eq!(String::from_utf8_lossy(&write[..]), "120 ");
+        Ok(())
     }
 
     #[test]
-    fn control_commands() {
+    fn control_commands() -> Result<(), Box<dyn Error>> {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
@@ -347,12 +348,13 @@ mod tests {
             &mut buf_read,
             &mut write,
         );
-        befunge.run();
+        befunge.run()?;
         assert_eq!(befunge.stack, [1, 2, 3]);
+        Ok(())
     }
 
     #[test]
-    fn literal_commands() {
+    fn literal_commands() -> Result<(), Box<dyn Error>> {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
@@ -366,17 +368,18 @@ mod tests {
                 &mut buf_read,
                 &mut write,
             );
-            befunge.run();
+            befunge.run()?;
             assert_eq!(
                 befunge.stack,
                 [0, 1, 2, 3, 4, 0x20, 0x20, 0x20, 5, 6, 7, 8, 9]
             );
         }
-        assert!(write.is_empty())
+        assert!(write.is_empty());
+        Ok(())
     }
 
     #[test]
-    fn arithmetic_commands() {
+    fn arithmetic_commands() -> Result<(), Box<dyn Error>> {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
@@ -389,12 +392,13 @@ mod tests {
             &mut buf_read,
             &mut write,
         );
-        befunge.run();
+        befunge.run()?;
         assert_eq!(befunge.stack, [-729, 17, 7, 21, 4, 2]);
+        Ok(())
     }
 
     #[test]
-    fn logical_operation_commands() {
+    fn logical_operation_commands() -> Result<(), Box<dyn Error>> {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
@@ -407,12 +411,13 @@ mod tests {
             &mut buf_read,
             &mut write,
         );
-        befunge.run();
+        befunge.run()?;
         assert_eq!(befunge.stack, [0, 1, 0, 1]);
+        Ok(())
     }
 
     #[test]
-    fn stack_operation_commands() {
+    fn stack_operation_commands() -> Result<(), Box<dyn Error>> {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
@@ -425,12 +430,13 @@ mod tests {
             &mut buf_read,
             &mut write,
         );
-        befunge.run();
+        befunge.run()?;
         assert_eq!(befunge.stack, [7, 3, 6]);
+        Ok(())
     }
 
     #[test]
-    fn memory_operation_commands() {
+    fn memory_operation_commands() -> Result<(), Box<dyn Error>> {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
@@ -443,13 +449,14 @@ mod tests {
             &mut buf_read,
             &mut write,
         );
-        befunge.run();
+        befunge.run()?;
         assert_eq!(befunge.stack, []);
         assert_eq!(world.get(7, 0), '1' as u8);
+        Ok(())
     }
 
     #[test]
-    fn io_commands() {
+    fn io_commands() -> Result<(), Box<dyn Error>> {
         let read = Vec::from("-205\n7\n".as_bytes());
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
@@ -462,8 +469,9 @@ mod tests {
             &mut buf_read,
             &mut write,
         );
-        befunge.run();
+        befunge.run()?;
         assert_eq!(befunge.stack, []);
         assert_eq!(String::from_utf8_lossy(&write[..]), "55 3");
+        Ok(())
     }
 }

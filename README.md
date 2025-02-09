@@ -29,13 +29,28 @@ cargo build --release
 
 ## Usage
 
-You can run a Befunge program by providing the path to your Befunge program file. The file path argument is required:
+You can run a Befunge program by providing the path to your Befunge program file:
 
 ```bash
-cargo run -- path/to/your/befunge/program  # Required: program file path
+cargo run -- path/to/your/befunge/program         # Run program normally
+cargo run -- path/to/your/befunge/program -d      # Run with debug mode
+cargo run -- path/to/your/befunge/program --debug # Run with debug mode
 ```
 
 If no file path is provided, the program will exit with an error.
+
+### Debug Mode
+
+When running with the `-d` or `--debug` flag, the interpreter will run in step-by-step debug mode. In this mode:
+- Each instruction step is displayed with detailed information
+- Shows current position, instruction, direction, and stack state
+- Displays the program grid with current position highlighted
+- Execution pauses after each step (press Enter to continue)
+
+This mode is useful for:
+- Learning how Befunge programs work
+- Debugging complex Befunge code
+- Understanding program flow and stack operations
 
 ## Example Befunge Programs
 

@@ -11,6 +11,7 @@ pub struct Befunge<'w, 'io> {
     mode: Mode,
     read: &'io mut dyn BufRead,
     write: &'io mut dyn Write,
+    debug_mode: bool,  // 追加: デバッグモードフラグ
 }
 
 #[derive(Debug)]
@@ -21,6 +22,7 @@ pub enum Direction {
     Right,
 }
 
+#[derive(Debug)]  // Mode enumにDebug traitを実装
 enum Mode {
     Interpret,
     AsciiPush,
@@ -34,6 +36,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
         direction: Direction,
         read: &'io mut dyn BufRead,
         write: &'io mut dyn Write,
+        debug_mode: bool,  // 追加: デバッグモードパラメータ
     ) -> Befunge<'w, 'io> {
         Befunge {
             world,
@@ -44,12 +47,48 @@ impl<'w, 'io> Befunge<'w, 'io> {
             mode: Mode::Interpret,
             read,
             write,
+            debug_mode,
         }
     }
+
+    // 追加: 実行状態を表示する関数
+    fn print_debug_info(&mut self) -> Result<(), Box<dyn Error>> {
+        if !self.debug_mode {
+            return Ok(());
+        }
+
+        writeln!(self.write, "\n=== Step Debug Info ===")?;
+        writeln!(self.write, "Position: ({}, {})", self.x, self.y)?;
+        writeln!(self.write, "Current instruction: {}", self.world.get(self.x, self.y) as char)?;
+        writeln!(self.write, "Direction: {:?}", self.direction)?;
+        writeln!(self.write, "Stack: {:?}", self.stack)?;
+        writeln!(self.write, "Mode: {:?}", self.mode)?;
+        
+        // プログラムの2D表示（現在位置をハイライト）
+        for y in 0..self.world.height() {
+            for x in 0..self.world.width() {
+                if x == self.x && y == self.y {
+                    write!(self.write, "[{}]", self.world.get(x, y) as char)?;
+                } else {
+                    write!(self.write, " {} ", self.world.get(x, y) as char)?;
+                }
+            }
+            writeln!(self.write)?;
+        }
+        writeln!(self.write, "==================\n")?;
+        Ok(())
+    }
+
     pub fn run(&mut self) -> Result<(), Box<dyn Error>> {
         use rand::{thread_rng, Rng};
         let mut rng = thread_rng();
         loop {
+            if self.debug_mode {
+                self.print_debug_info()?;
+                // デバッグモード時は1ステップ実行後に一時停止
+                let mut input = String::new();
+                self.read.read_line(&mut input)?;
+            }
             match self.mode {
                 Mode::Interpret => match self.world.get(self.x, self.y) as char {
                     // Push this number on the stack
@@ -281,6 +320,7 @@ mod tests {
                 Direction::Right,
                 &mut buf_read,
                 &mut write,
+                false,
             );
             befunge.run()?;
         }
@@ -303,6 +343,7 @@ mod tests {
                 Direction::Right,
                 &mut buf_read,
                 &mut write,
+                false,
             );
             befunge.run()?;
         }
@@ -324,6 +365,7 @@ mod tests {
                 Direction::Right,
                 &mut buf_read,
                 &mut write,
+                false,
             );
             befunge.run()?;
             assert_eq!(befunge.stack, [0]);
@@ -345,6 +387,7 @@ mod tests {
             Direction::Right,
             &mut buf_read,
             &mut write,
+            false,
         );
         befunge.run()?;
         assert_eq!(befunge.stack, [1, 2, 3]);
@@ -365,6 +408,7 @@ mod tests {
                 Direction::Right,
                 &mut buf_read,
                 &mut write,
+                false,
             );
             befunge.run()?;
             assert_eq!(
@@ -389,6 +433,7 @@ mod tests {
             Direction::Right,
             &mut buf_read,
             &mut write,
+            false,
         );
         befunge.run()?;
         assert_eq!(befunge.stack, [-729, 17, 7, 21, 4, 2]);
@@ -408,6 +453,7 @@ mod tests {
             Direction::Right,
             &mut buf_read,
             &mut write,
+            false,
         );
         befunge.run()?;
         assert_eq!(befunge.stack, [0, 1, 0, 1]);
@@ -427,6 +473,7 @@ mod tests {
             Direction::Right,
             &mut buf_read,
             &mut write,
+            false,
         );
         befunge.run()?;
         assert_eq!(befunge.stack, [7, 3, 6]);
@@ -446,6 +493,7 @@ mod tests {
             Direction::Right,
             &mut buf_read,
             &mut write,
+            false,
         );
         befunge.run()?;
         assert_eq!(befunge.stack, []);
@@ -466,10 +514,69 @@ mod tests {
             Direction::Right,
             &mut buf_read,
             &mut write,
+            false,
         );
         befunge.run()?;
         assert_eq!(befunge.stack, []);
         assert_eq!(String::from_utf8_lossy(&write[..]), "55 3");
+        Ok(())
+    }
+
+    #[test]
+    fn debug_mode_output() -> Result<(), Box<dyn Error>> {
+        let read = Vec::from("\n\n".as_bytes());  // mutを削除
+        let mut buf_read = BufReader::new(&read[..]);
+        let mut write = Vec::new();
+        let mut world = World::from_source_string("12+@");
+        {
+            let mut befunge = Befunge::new(
+                &mut world,
+                0,
+                0,
+                Direction::Right,
+                &mut buf_read,
+                &mut write,
+                true,  // デバッグモードを有効化
+            );
+            befunge.run()?;
+        }  // befungeのスコープを制限
+
+        let output = String::from_utf8_lossy(&write);
+        // デバッグ情報が含まれていることを確認
+        assert!(output.contains("=== Step Debug Info ==="));
+        assert!(output.contains("Position: (0, 0)"));
+        assert!(output.contains("Current instruction: 1"));
+        assert!(output.contains("Direction: Right"));
+        assert!(output.contains("Stack:"));
+        assert!(output.contains("Mode: Interpret"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn debug_mode_disabled() -> Result<(), Box<dyn Error>> {
+        let read = Vec::new();
+        let mut buf_read = BufReader::new(&read[..]);
+        let mut write = Vec::new();
+        let mut world = World::from_source_string("12+@");
+        {
+            let mut befunge = Befunge::new(
+                &mut world,
+                0,
+                0,
+                Direction::Right,
+                &mut buf_read,
+                &mut write,
+                false,  // デバッグモードを無効化
+            );
+            befunge.run()?;
+        }  // befungeのスコープを制限
+        
+        let output = String::from_utf8_lossy(&write);
+        // デバッグ情報が含まれていないことを確認
+        assert!(!output.contains("=== Step Debug Info ==="));
+        assert!(!output.contains("Position:"));
+
         Ok(())
     }
 }

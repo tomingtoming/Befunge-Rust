@@ -12,10 +12,12 @@ mod world;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    if args.len() != 2 {
-        eprintln!("Usage: {} <befunge-program-file>", args[0]);
+    if args.len() < 2 || args.len() > 3 {
+        eprintln!("Usage: {} <befunge-program-file> [-d|--debug]", args[0]);
         process::exit(1);
     }
+
+    let debug_mode = args.len() == 3 && (args[2] == "-d" || args[2] == "--debug");
 
     let src = match fs::read_to_string(&args[1]) {
         Ok(content) => content,
@@ -37,6 +39,7 @@ fn main() {
         Direction::Right,
         &mut stdin_lock,
         &mut stdout,
+        debug_mode,
     );
 
     if let Err(err) = befunge.run() {

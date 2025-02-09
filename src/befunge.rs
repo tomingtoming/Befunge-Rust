@@ -11,7 +11,7 @@ pub struct Befunge<'w, 'io> {
     mode: Mode,
     read: &'io mut dyn BufRead,
     write: &'io mut dyn Write,
-    debug_mode: bool,  // 追加: デバッグモードフラグ
+    debug_mode: bool,  // Flag for debug mode
 }
 
 #[derive(Debug)]
@@ -22,7 +22,7 @@ pub enum Direction {
     Right,
 }
 
-#[derive(Debug)]  // Mode enumにDebug traitを実装
+#[derive(Debug)]  // Implement Debug trait for Mode enum
 enum Mode {
     Interpret,
     AsciiPush,
@@ -36,7 +36,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
         direction: Direction,
         read: &'io mut dyn BufRead,
         write: &'io mut dyn Write,
-        debug_mode: bool,  // 追加: デバッグモードパラメータ
+        debug_mode: bool,  // Debug mode parameter
     ) -> Befunge<'w, 'io> {
         Befunge {
             world,
@@ -51,7 +51,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
         }
     }
 
-    // スタックの値を文字列として整形する関数を追加
+    // Format stack value as string with hex and ASCII representation
     fn format_stack_value(value: i64) -> String {
         let hex = format!("0x{:02X}", value);
         if (0x20..=0x7E).contains(&value) {
@@ -61,7 +61,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
         }
     }
 
-    // 追加: 実行状態を表示する関数
+    // Print current execution state for debugging
     fn print_debug_info(&mut self) -> Result<(), Box<dyn Error>> {
         if !self.debug_mode {
             return Ok(());
@@ -79,7 +79,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
         )?;
         writeln!(self.write, "Mode: {:?}", self.mode)?;
         
-        // プログラムの2D表示（現在位置をハイライト）
+        // Display program grid with highlighted current position
         for y in 0..self.world.height() {
             for x in 0..self.world.width() {
                 if x == self.x && y == self.y {
@@ -100,7 +100,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
         loop {
             if self.debug_mode {
                 self.print_debug_info()?;
-                // デバッグモード時は1ステップ実行後に一時停止
+                // Pause after each step in debug mode
                 let mut input = String::new();
                 self.read.read_line(&mut input)?;
             }
@@ -539,7 +539,7 @@ mod tests {
 
     #[test]
     fn debug_mode_output() -> Result<(), Box<dyn Error>> {
-        let read = Vec::from("\n\n".as_bytes());  // mutを削除
+        let read = Vec::from("\n\n".as_bytes());
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
         let mut world = World::from_source_string("12+@");
@@ -551,13 +551,13 @@ mod tests {
                 Direction::Right,
                 &mut buf_read,
                 &mut write,
-                true,  // デバッグモードを有効化
+                true,  // Enable debug mode
             );
             befunge.run()?;
-        }  // befungeのスコープを制限
+        }
 
         let output = String::from_utf8_lossy(&write);
-        // デバッグ情報が含まれていることを確認
+        // Verify debug info is present
         assert!(output.contains("=== Step Debug Info ==="));
         assert!(output.contains("Position: (0, 0)"));
         assert!(output.contains("Current instruction: 1"));
@@ -582,13 +582,13 @@ mod tests {
                 Direction::Right,
                 &mut buf_read,
                 &mut write,
-                false,  // デバッグモードを無効化
+                false,  // Disable debug mode
             );
             befunge.run()?;
-        }  // befungeのスコープを制限
+        }
         
         let output = String::from_utf8_lossy(&write);
-        // デバッグ情報が含まれていないことを確認
+        // Verify debug info is not present
         assert!(!output.contains("=== Step Debug Info ==="));
         assert!(!output.contains("Position:"));
 
@@ -600,7 +600,7 @@ mod tests {
         let read = Vec::from("\n\n".as_bytes());
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
-        let mut world = World::from_source_string("65@");  // 'A' のASCII値
+        let mut world = World::from_source_string("65@");  // ASCII value for 'A'
         {
             let mut befunge = Befunge::new(
                 &mut world,
@@ -609,18 +609,18 @@ mod tests {
                 Direction::Right,
                 &mut buf_read,
                 &mut write,
-                true,
+                true,  // Enable debug mode
             );
             befunge.run()?;
         }
 
         let output = String::from_utf8_lossy(&write);
-        // デバッグ情報が含まれていることを確認
+        // Verify debug info is present
         assert!(output.contains("=== Step Debug Info ==="));
         assert!(output.contains("Position: (0, 0)"));
         assert!(output.contains("Current instruction: 6"));
         assert!(output.contains("Direction: Right"));
-        // 16進数とASCII文字の表示を確認
+        // Check hex and ASCII character display
         assert!(output.contains("Stack: [0x41 ('A')]"));
         assert!(output.contains("Mode: Interpret"));
 

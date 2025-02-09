@@ -63,7 +63,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
 
     // 追加: 実行状態を表示する関数
     fn print_debug_info(&mut self) -> Result<(), Box<dyn Error>> {
-        if (!self.debug_mode) {
+        if !self.debug_mode {
             return Ok(());
         }
 

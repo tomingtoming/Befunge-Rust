@@ -1,13 +1,13 @@
 extern crate rand;
 
-use befunge::{Befunge, Direction};
+use interpreter::{Interpreter, Direction};
 use std::env;
 use std::fs;
 use std::io::{self, BufReader};
 use std::process;
 use world::World;
 
-mod befunge;
+mod interpreter;
 mod world;
 
 // Main entry point for the Befunge interpreter
@@ -36,7 +36,7 @@ fn main() {
     let mut stdout = io::stdout();
 
     // Initialize and run the Befunge interpreter
-    let mut befunge = Befunge::new(
+    let mut interpreter = Interpreter::new(
         &mut world,
         0,
         0,
@@ -46,7 +46,7 @@ fn main() {
         debug_mode,
     );
 
-    if let Err(err) = befunge.run() {
+    if let Err(err) = interpreter.run() {
         eprintln!("Error executing Befunge program: {}", err);
         process::exit(1);
     }

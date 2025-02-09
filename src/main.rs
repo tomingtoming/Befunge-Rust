@@ -10,6 +10,7 @@ use world::World;
 mod befunge;
 mod world;
 
+// Main entry point for the Befunge interpreter
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 || args.len() > 3 {
@@ -17,8 +18,10 @@ fn main() {
         process::exit(1);
     }
 
+    // Parse debug mode flag from command line arguments
     let debug_mode = args.len() == 3 && (args[2] == "-d" || args[2] == "--debug");
 
+    // Read the Befunge program from file
     let src = match fs::read_to_string(&args[1]) {
         Ok(content) => content,
         Err(err) => {
@@ -32,6 +35,7 @@ fn main() {
     let mut stdin_lock = BufReader::new(stdin.lock());
     let mut stdout = io::stdout();
 
+    // Initialize and run the Befunge interpreter
     let mut befunge = Befunge::new(
         &mut world,
         0,

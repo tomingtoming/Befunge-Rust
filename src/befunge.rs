@@ -51,9 +51,19 @@ impl<'w, 'io> Befunge<'w, 'io> {
         }
     }
 
+    // スタックの値を文字列として整形する関数を追加
+    fn format_stack_value(value: i64) -> String {
+        let hex = format!("0x{:02X}", value);
+        if (0x20..=0x7E).contains(&value) {
+            format!("{} ('{}')", hex, char::from_u32(value as u32).unwrap())
+        } else {
+            hex
+        }
+    }
+
     // 追加: 実行状態を表示する関数
     fn print_debug_info(&mut self) -> Result<(), Box<dyn Error>> {
-        if !self.debug_mode {
+        if (!self.debug_mode) {
             return Ok(());
         }
 
@@ -61,7 +71,12 @@ impl<'w, 'io> Befunge<'w, 'io> {
         writeln!(self.write, "Position: ({}, {})", self.x, self.y)?;
         writeln!(self.write, "Current instruction: {}", self.world.get(self.x, self.y) as char)?;
         writeln!(self.write, "Direction: {:?}", self.direction)?;
-        writeln!(self.write, "Stack: {:?}", self.stack)?;
+        writeln!(self.write, "Stack: [{}]", 
+            self.stack.iter()
+                .map(|&v| Self::format_stack_value(v))
+                .collect::<Vec<_>>()
+                .join(", ")
+        )?;
         writeln!(self.write, "Mode: {:?}", self.mode)?;
         
         // プログラムの2D表示（現在位置をハイライト）
@@ -576,6 +591,38 @@ mod tests {
         // デバッグ情報が含まれていないことを確認
         assert!(!output.contains("=== Step Debug Info ==="));
         assert!(!output.contains("Position:"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn debug_mode_output_ascii() -> Result<(), Box<dyn Error>> {
+        let read = Vec::from("\n\n".as_bytes());
+        let mut buf_read = BufReader::new(&read[..]);
+        let mut write = Vec::new();
+        let mut world = World::from_source_string("65@");  // 'A' のASCII値
+        {
+            let mut befunge = Befunge::new(
+                &mut world,
+                0,
+                0,
+                Direction::Right,
+                &mut buf_read,
+                &mut write,
+                true,
+            );
+            befunge.run()?;
+        }
+
+        let output = String::from_utf8_lossy(&write);
+        // デバッグ情報が含まれていることを確認
+        assert!(output.contains("=== Step Debug Info ==="));
+        assert!(output.contains("Position: (0, 0)"));
+        assert!(output.contains("Current instruction: 6"));
+        assert!(output.contains("Direction: Right"));
+        // 16進数とASCII文字の表示を確認
+        assert!(output.contains("Stack: [0x41 ('A')]"));
+        assert!(output.contains("Mode: Interpret"));
 
         Ok(())
     }

@@ -37,6 +37,39 @@ cargo run -- path/to/your/befunge/program  # Required: program file path
 
 If no file path is provided, the program will exit with an error.
 
+## Web Usage
+This project can also be used in web browsers through WebAssembly (Wasm).
+
+### Setup
+1. Make sure you have Node.js and npm installed
+2. Build the Wasm package:
+   ```bash
+   wasm-pack build
+   ```
+3. Set up the web application:
+   ```bash
+   cd www
+   npm install
+   npm run start
+   ```
+4. Open http://localhost:8080 in your browser
+
+### Using in Your Web Project
+You can import and use the Befunge interpreter in your JavaScript code:
+
+```javascript
+import { WebBefunge } from "befunge-rust";
+
+// Create a new interpreter instance with your Befunge program
+const interpreter = new WebBefunge(program);
+
+// Set input if needed
+interpreter.set_input(input);
+
+// Run the program
+const output = await interpreter.run();
+```
+
 ## Example Befunge Programs
 
 ### Hello World

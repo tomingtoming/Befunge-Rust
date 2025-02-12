@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Befunge-93 Playground</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .editor-container {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      .code-area {
+        flex: 1;
+      }
+      textarea {
+        width: 100%;
+        height: 300px;
+        font-family: monospace;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-right: 10px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .output {
+        background-color: white;
+        padding: 20px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        min-height: 100px;
+        white-space: pre-wrap;
+        font-family: monospace;
+      }
+      .examples {
+        margin-top: 20px;
+      }
+      .example {
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Befunge-93 Playground</h1>
+      <div class="editor-container">
+        <div class="code-area">
+          <h3>Program</h3>
+          <textarea id="program">// Hello World example
+>              v
+v  ,,,,,\"Hello\"<
+>48*,          v
+v,,,,,,\"World!\"<
+>25*,@</textarea>
+        </div>
+        <div class="code-area">
+          <h3>Input</h3>
+          <textarea id="input" placeholder="Enter program input here..."></textarea>
+        </div>
+      </div>
+      <div>
+        <button id="run">Run Program</button>
+        <button id="clear">Clear Output</button>
+      </div>
+      <h3>Output</h3>
+      <div id="output" class="output"></div>
+      
+      <div class="examples">
+        <h3>Example Programs</h3>
+        <div class="example">
+          <button onclick="loadExample('hello')">Hello World</button>
+          <button onclick="loadExample('factorial')">Factorial</button>
+          <button onclick="loadExample('quine')">Quine</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      const examples = {
+        hello: `>              v
+v  ,,,,,\"Hello\"<
+>48*,          v
+v,,,,,,\"World!\"<
+>25*,@`,
+        factorial: `5 100p:v
+v *g00:_00g.@
+>00p1-:^`,
+        quine: `01->1# +# :# 0# g# ,# :# 5# 8# *# 4# +# -# _@`
+      };
+
+      function loadExample(name) {
+        document.getElementById('program').value = examples[name];
+      }
+
+      async function init() {
+        try {
+          const { run_befunge } = await import('/index.js');
+          const runButton = document.getElementById('run');
+          const clearButton = document.getElementById('clear');
+          const programArea = document.getElementById('program');
+          const inputArea = document.getElementById('input');
+          const outputArea = document.getElementById('output');
+
+          runButton.addEventListener('click', () => {
+            outputArea.textContent = 'Running...';
+            run_befunge(programArea.value, inputArea.value)
+              .then(result => {
+                outputArea.textContent = result;
+              })
+              .catch(e => {
+                outputArea.textContent = 'Error: ' + e;
+                console.error('Runtime error:', e);
+              });
+          });
+
+          clearButton.addEventListener('click', () => {
+            outputArea.textContent = '';
+          });
+        } catch (e) {
+          console.error('Initialization error:', e);
+          document.getElementById('output').textContent = 'Failed to initialize: ' + e;
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>

@@ -2,8 +2,8 @@ use crate::interpreter::{Direction, Interpreter, Mode};
 use rand::{thread_rng, Rng};
 use std::error::Error;
 
-pub(crate) fn execute_instruction<'w, 'io>(
-    interpreter: &mut Interpreter<'w, 'io>,
+pub(crate) fn execute_instruction(
+    interpreter: &mut Interpreter<'_, '_>,
     instruction: char,
 ) -> Result<Option<()>, Box<dyn Error>> {
     match instruction {

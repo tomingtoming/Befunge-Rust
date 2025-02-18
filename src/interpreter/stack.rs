@@ -4,6 +4,12 @@ pub struct Stack {
     values: Vec<i64>,
 }
 
+impl Default for Stack {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Stack {
     pub fn new() -> Self {
         Self { values: Vec::new() }

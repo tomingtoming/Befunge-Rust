@@ -1,6 +1,6 @@
-use std::error::Error;
-use rand::{thread_rng, Rng};
 use crate::interpreter::{Direction, Interpreter, Mode};
+use rand::{thread_rng, Rng};
+use std::error::Error;
 
 pub(crate) fn execute_instruction<'w, 'io>(
     interpreter: &mut Interpreter<'w, 'io>,
@@ -9,7 +9,9 @@ pub(crate) fn execute_instruction<'w, 'io>(
     match instruction {
         // Push this number on the stack
         '0'..='9' => {
-            interpreter.stack.push(instruction.to_digit(10).unwrap() as i64);
+            interpreter
+                .stack
+                .push(instruction.to_digit(10).unwrap() as i64);
             Ok(None)
         }
         // Addition: Pop a and b, then push a+b

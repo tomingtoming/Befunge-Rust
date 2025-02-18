@@ -1,12 +1,12 @@
 mod debug;
-mod stack;
 mod operations;
+mod stack;
 
 use crate::world::World;
-use std::error::Error;
-use std::io::{BufRead, Write};
 pub use debug::DebugOutput;
 pub use stack::Stack;
+use std::error::Error;
+use std::io::{BufRead, Write};
 
 #[derive(Debug)]
 pub enum Direction {
@@ -109,7 +109,7 @@ impl<'w, 'io> Interpreter<'w, 'io> {
         writeln!(self.write, "Direction: {direction}")?;
         writeln!(self.write, "Stack: {stack}")?;
         writeln!(self.write, "Mode: {mode}")?;
-        
+
         // グリッドの描画
         let curr_x = self.x;
         let curr_y = self.y;
@@ -131,7 +131,7 @@ impl<'w, 'io> Interpreter<'w, 'io> {
     fn debug_step(&mut self) -> Result<(), Box<dyn Error>> {
         if self.debug.is_enabled() {
             self.write_debug_info()?;
-            
+
             // Pause execution in debug mode
             let mut input = String::new();
             self.read.read_line(&mut input)?;
@@ -141,7 +141,7 @@ impl<'w, 'io> Interpreter<'w, 'io> {
 
     pub fn run(&mut self) -> Result<(), Box<dyn Error>> {
         use operations::execute_instruction;
-        
+
         loop {
             self.debug_step()?;
 
@@ -151,7 +151,7 @@ impl<'w, 'io> Interpreter<'w, 'io> {
                     if let Some(result) = execute_instruction(self, instruction)? {
                         return Ok(result);
                     }
-                },
+                }
                 Mode::AsciiPush => match instruction {
                     '"' => self.mode = Mode::Interpret,
                     c => self.stack.push(c as i64),

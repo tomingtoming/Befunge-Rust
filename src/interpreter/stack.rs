@@ -6,9 +6,7 @@ pub struct Stack {
 
 impl Stack {
     pub fn new() -> Self {
-        Self {
-            values: Vec::new()
-        }
+        Self { values: Vec::new() }
     }
 
     pub fn push(&mut self, value: i64) {
@@ -59,7 +57,9 @@ impl Stack {
 impl fmt::Display for Stack {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "[")?;
-        let formatted: Vec<_> = self.values.iter()
+        let formatted: Vec<_> = self
+            .values
+            .iter()
             .map(|&v| Stack::format_value(v))
             .collect();
         write!(f, "{}]", formatted.join(", "))

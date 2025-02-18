@@ -1,6 +1,6 @@
 extern crate rand;
 
-use interpreter::{Interpreter, Direction};
+use interpreter::{Direction, Interpreter};
 use std::env;
 use std::fs;
 use std::io::{self, BufReader};

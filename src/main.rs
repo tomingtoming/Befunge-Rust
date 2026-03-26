@@ -25,7 +25,13 @@ fn main() {
         }
     };
 
-    let mut world = World::from_source_string(&src);
+    let mut world = match World::from_source_string(&src) {
+        Ok(world) => world,
+        Err(err) => {
+            eprintln!("Error parsing Befunge program: {}", err);
+            process::exit(1);
+        }
+    };
     let stdin = io::stdin();
     let mut stdin_lock = BufReader::new(stdin.lock());
     let mut stdout = io::stdout();

@@ -1,3 +1,5 @@
+use std::io;
+
 pub struct World {
     width: usize,
     height: usize,
@@ -13,10 +15,17 @@ impl World {
         self.height
     }
 
-    pub fn from_source_string(source: &str) -> World {
+    pub fn from_source_string(source: &str) -> io::Result<World> {
         let mut world: Vec<Vec<u8>> = Vec::new();
-        let lines: Vec<&str> = source.split('\n').collect();
+        let lines: Vec<&str> = source.lines().collect();
         let width = lines.iter().fold(0, |i, s| i.max(s.len()));
+
+        if width == 0 {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "empty befunge program",
+            ));
+        }
 
         for line in lines {
             let mut belt = Vec::from(line);
@@ -26,11 +35,11 @@ impl World {
             world.push(belt)
         }
 
-        World {
+        Ok(World {
             width,
             height: world.len(),
             field: world,
-        }
+        })
     }
 
     #[allow(dead_code)]
@@ -80,15 +89,40 @@ mod tests {
     use super::World;
 
     #[test]
-    fn hello_world_program() {
+    fn hello_world_program() -> std::io::Result<()> {
         let src =
             ">              v\nv  ,,,,,\"Hello\"<\n>48*,          v\nv,,,,,,\"World!\"<\n>25*,@";
-        let world = World::from_source_string(src);
+        let world = World::from_source_string(src)?;
         assert_eq!(world.get(0, 0), b'>');
         assert_eq!(world.get(15, 0), b'v');
         assert_eq!(world.get(15, 4), b' ');
         assert_eq!(world.get(0, 4), b'>');
         assert_eq!(world.get(16, 5), b'>');
+        Ok(())
+    }
+
+    #[test]
+    fn trailing_newline_does_not_add_an_empty_row() -> std::io::Result<()> {
+        let world = World::from_source_string(">@\n")?;
+        assert_eq!(world.width(), 2);
+        assert_eq!(world.height(), 1);
+        Ok(())
+    }
+
+    #[test]
+    fn empty_program_returns_error() {
+        let err = World::from_source_string("")
+            .err()
+            .expect("empty source should error");
+        assert_eq!(err.to_string(), "empty befunge program");
+    }
+
+    #[test]
+    fn newline_only_program_returns_error() {
+        let err = World::from_source_string("\n\n")
+            .err()
+            .expect("blank source should error");
+        assert_eq!(err.to_string(), "empty befunge program");
     }
 
     #[test]

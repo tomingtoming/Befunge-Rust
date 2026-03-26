@@ -276,7 +276,7 @@ mod tests {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
-        let mut world = World::from_source_string(src);
+        let mut world = World::from_source_string(src)?;
         {
             let mut befunge = Befunge::new(
                 &mut world,
@@ -298,7 +298,7 @@ mod tests {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
-        let mut world = World::from_source_string(src);
+        let mut world = World::from_source_string(src)?;
         {
             let mut befunge = Befunge::new(
                 &mut world,
@@ -319,7 +319,7 @@ mod tests {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
-        let mut world = World::from_source_string("5 100p:v\nv *g00:_00g.@\n>00p1-:^");
+        let mut world = World::from_source_string("5 100p:v\nv *g00:_00g.@\n>00p1-:^")?;
         {
             let mut befunge = Befunge::new(
                 &mut world,
@@ -341,7 +341,7 @@ mod tests {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
-        let mut world = World::from_source_string("^    _| 3\n0#@07|5 >\n<@?@# _ v\n1 @     2");
+        let mut world = World::from_source_string("^    _| 3\n0#@07|5 >\n<@?@# _ v\n1 @     2")?;
         let mut befunge = Befunge::new(
             &mut world,
             0,
@@ -360,7 +360,7 @@ mod tests {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
-        let mut world = World::from_source_string(r#"01234"   "56789@"#);
+        let mut world = World::from_source_string(r#"01234"   "56789@"#)?;
         {
             let mut befunge = Befunge::new(
                 &mut world,
@@ -385,7 +385,7 @@ mod tests {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
-        let mut world = World::from_source_string("09-9*9*98+92-73*92/83%@");
+        let mut world = World::from_source_string("09-9*9*98+92-73*92/83%@")?;
         let mut befunge = Befunge::new(
             &mut world,
             0,
@@ -404,7 +404,7 @@ mod tests {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
-        let mut world = World::from_source_string("10/.@");
+        let mut world = World::from_source_string("10/.@").expect("test program should parse");
         let mut befunge = Befunge::new(
             &mut world,
             0,
@@ -423,7 +423,7 @@ mod tests {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
-        let mut world = World::from_source_string("10%.@");
+        let mut world = World::from_source_string("10%.@").expect("test program should parse");
         let mut befunge = Befunge::new(
             &mut world,
             0,
@@ -442,7 +442,7 @@ mod tests {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
-        let mut world = World::from_source_string("8!0!12`21`@");
+        let mut world = World::from_source_string("8!0!12`21`@")?;
         let mut befunge = Befunge::new(
             &mut world,
             0,
@@ -461,7 +461,7 @@ mod tests {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
-        let mut world = World::from_source_string(r#"73:6\$@"#);
+        let mut world = World::from_source_string(r#"73:6\$@"#)?;
         let mut befunge = Befunge::new(
             &mut world,
             0,
@@ -480,7 +480,7 @@ mod tests {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
-        let mut world = World::from_source_string("00g1+70p@");
+        let mut world = World::from_source_string("00g1+70p@")?;
         let mut befunge = Befunge::new(
             &mut world,
             0,
@@ -500,7 +500,7 @@ mod tests {
         let read = Vec::from("-205\n7\n".as_bytes());
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
-        let mut world = World::from_source_string("&~.,@");
+        let mut world = World::from_source_string("&~.,@")?;
         let mut befunge = Befunge::new(
             &mut world,
             0,

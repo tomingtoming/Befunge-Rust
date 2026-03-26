@@ -1,6 +1,6 @@
 use crate::world::World;
 use std::error::Error;
-use std::io::{BufRead, Write};
+use std::io::{self, BufRead, Write};
 
 pub struct Befunge<'w, 'io> {
     world: &'w mut World,
@@ -24,6 +24,10 @@ pub enum Direction {
 enum Mode {
     Interpret,
     AsciiPush,
+}
+
+fn invalid_arithmetic_operation(message: &'static str) -> Box<dyn Error> {
+    io::Error::new(io::ErrorKind::InvalidData, message).into()
 }
 
 impl<'w, 'io> Befunge<'w, 'io> {
@@ -86,7 +90,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
                         let a = self.stack.pop().unwrap_or(0);
                         let b = self.stack.pop().unwrap_or(0);
                         if a == 0 {
-                            return Ok(());
+                            return Err(invalid_arithmetic_operation("division by zero"));
                         } else {
                             self.stack.push(b / a);
                         }
@@ -96,7 +100,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
                         let a = self.stack.pop().unwrap_or(0);
                         let b = self.stack.pop().unwrap_or(0);
                         if a == 0 {
-                            return Ok(());
+                            return Err(invalid_arithmetic_operation("modulo by zero"));
                         } else {
                             self.stack.push(b % a);
                         }
@@ -393,6 +397,44 @@ mod tests {
         befunge.run()?;
         assert_eq!(befunge.stack, [-729, 17, 7, 21, 4, 2]);
         Ok(())
+    }
+
+    #[test]
+    fn divide_by_zero_returns_error() {
+        let read = Vec::new();
+        let mut buf_read = BufReader::new(&read[..]);
+        let mut write = Vec::new();
+        let mut world = World::from_source_string("10/.@");
+        let mut befunge = Befunge::new(
+            &mut world,
+            0,
+            0,
+            Direction::Right,
+            &mut buf_read,
+            &mut write,
+        );
+        let err = befunge.run().expect_err("division by zero should error");
+        assert_eq!(err.to_string(), "division by zero");
+        assert!(write.is_empty());
+    }
+
+    #[test]
+    fn modulo_by_zero_returns_error() {
+        let read = Vec::new();
+        let mut buf_read = BufReader::new(&read[..]);
+        let mut write = Vec::new();
+        let mut world = World::from_source_string("10%.@");
+        let mut befunge = Befunge::new(
+            &mut world,
+            0,
+            0,
+            Direction::Right,
+            &mut buf_read,
+            &mut write,
+        );
+        let err = befunge.run().expect_err("modulo by zero should error");
+        assert_eq!(err.to_string(), "modulo by zero");
+        assert!(write.is_empty());
     }
 
     #[test]

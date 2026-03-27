@@ -7,6 +7,10 @@ pub struct World {
 }
 
 impl World {
+    fn wrap_signed_coordinate(coord: i32, size: usize) -> usize {
+        coord.rem_euclid(size as i32) as usize
+    }
+
     pub fn width(&self) -> usize {
         self.width
     }
@@ -75,8 +79,21 @@ impl World {
         self.field[y % self.height][x % self.width]
     }
 
+    pub fn get_signed(&self, x: i32, y: i32) -> u8 {
+        self.get(
+            Self::wrap_signed_coordinate(x, self.width),
+            Self::wrap_signed_coordinate(y, self.height),
+        )
+    }
+
     pub fn set(&mut self, x: usize, y: usize, value: u8) {
         self.field[y % self.height][x % self.width] = value;
+    }
+
+    pub fn set_signed(&mut self, x: i32, y: i32, value: u8) {
+        let x = Self::wrap_signed_coordinate(x, self.width);
+        let y = Self::wrap_signed_coordinate(y, self.height);
+        self.set(x, y, value);
     }
 }
 
@@ -121,6 +138,15 @@ mod tests {
         assert_eq!(world.height(), 2);
         assert_eq!(world.get(0, 0), b' ');
         assert_eq!(world.get(0, 1), b' ');
+        Ok(())
+    }
+
+    #[test]
+    fn signed_coordinates_wrap_toroidally() -> std::io::Result<()> {
+        let mut world = World::from_source_string("abc\ndef")?;
+        assert_eq!(world.get_signed(-1, -1), b'f');
+        world.set_signed(-1, -1, b'!');
+        assert_eq!(world.get(2, 1), b'!');
         Ok(())
     }
 

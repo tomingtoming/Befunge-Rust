@@ -214,14 +214,14 @@ impl<'w, 'io> Befunge<'w, 'io> {
                         let y = self.stack.pop().unwrap_or(0);
                         let x = self.stack.pop().unwrap_or(0);
                         let v = self.stack.pop().unwrap_or(0);
-                        self.world.set(x as usize, y as usize, v as u8); // TODO: Change position to relative
+                        self.world.set_signed(x, y, v as u8);
                     }
                     // A "get" call (a way to retrieve data in storage). Pop y and x, then push ASCII value of the character at that position in the program
                     'g' => {
                         let y = self.stack.pop().unwrap_or(0);
                         let x = self.stack.pop().unwrap_or(0);
-                        let v = self.world.get(x as usize, y as usize);
-                        self.stack.push(v as i32); // TODO: Change position to relative
+                        let v = self.world.get_signed(x, y);
+                        self.stack.push(v as i32);
                     }
                     // Ask user for a number and push it
                     '&' => {

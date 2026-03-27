@@ -1,5 +1,8 @@
 use std::io;
 
+const FUNGE_WIDTH: usize = 80;
+const FUNGE_HEIGHT: usize = 25;
+
 pub struct World {
     width: usize,
     height: usize,
@@ -20,24 +23,32 @@ impl World {
     }
 
     pub fn from_source_string(source: &str) -> io::Result<World> {
-        let mut world: Vec<Vec<u8>> = Vec::new();
-        let mut lines: Vec<&str> = source.lines().collect();
-        if lines.is_empty() {
-            lines.push("");
-        }
-        let width = lines.iter().fold(1, |i, s| i.max(s.len()));
+        let lines: Vec<&str> = source.lines().collect();
 
-        for line in lines {
-            let mut belt = Vec::from(line);
-            while belt.len() != width {
-                belt.push(b' ');
+        if lines.len() > FUNGE_HEIGHT {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "program exceeds 25 rows",
+            ));
+        }
+
+        if lines.iter().any(|line| line.len() > FUNGE_WIDTH) {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "program exceeds 80 columns",
+            ));
+        }
+
+        let mut world = vec![vec![b' '; FUNGE_WIDTH]; FUNGE_HEIGHT];
+        for (y, line) in lines.into_iter().enumerate() {
+            for (x, byte) in line.bytes().enumerate() {
+                world[y][x] = byte;
             }
-            world.push(belt)
         }
 
         Ok(World {
-            width,
-            height: world.len(),
+            width: FUNGE_WIDTH,
+            height: FUNGE_HEIGHT,
             field: world,
         })
     }
@@ -106,48 +117,72 @@ mod tests {
         let src =
             ">              v\nv  ,,,,,\"Hello\"<\n>48*,          v\nv,,,,,,\"World!\"<\n>25*,@";
         let world = World::from_source_string(src)?;
+        assert_eq!(world.width(), 80);
+        assert_eq!(world.height(), 25);
         assert_eq!(world.get(0, 0), b'>');
         assert_eq!(world.get(15, 0), b'v');
         assert_eq!(world.get(15, 4), b' ');
-        assert_eq!(world.get(0, 4), b'>');
-        assert_eq!(world.get(16, 5), b'>');
+        assert_eq!(world.get(0, 5), b' ');
+        assert_eq!(world.get(79, 24), b' ');
         Ok(())
     }
 
     #[test]
-    fn trailing_newline_does_not_add_an_empty_row() -> std::io::Result<()> {
+    fn source_is_loaded_into_a_fixed_80_by_25_torus() -> std::io::Result<()> {
         let world = World::from_source_string(">@\n")?;
-        assert_eq!(world.width(), 2);
-        assert_eq!(world.height(), 1);
+        assert_eq!(world.width(), 80);
+        assert_eq!(world.height(), 25);
+        assert_eq!(world.get(0, 0), b'>');
+        assert_eq!(world.get(1, 0), b'@');
+        assert_eq!(world.get(2, 0), b' ');
+        assert_eq!(world.get(0, 1), b' ');
         Ok(())
     }
 
     #[test]
-    fn empty_program_creates_a_blank_cell() -> std::io::Result<()> {
+    fn empty_program_creates_a_blank_torus() -> std::io::Result<()> {
         let world = World::from_source_string("")?;
-        assert_eq!(world.width(), 1);
-        assert_eq!(world.height(), 1);
+        assert_eq!(world.width(), 80);
+        assert_eq!(world.height(), 25);
         assert_eq!(world.get(0, 0), b' ');
+        assert_eq!(world.get(79, 24), b' ');
         Ok(())
     }
 
     #[test]
-    fn newline_only_program_creates_blank_rows() -> std::io::Result<()> {
+    fn newline_only_program_creates_blank_torus() -> std::io::Result<()> {
         let world = World::from_source_string("\n\n")?;
-        assert_eq!(world.width(), 1);
-        assert_eq!(world.height(), 2);
+        assert_eq!(world.width(), 80);
+        assert_eq!(world.height(), 25);
         assert_eq!(world.get(0, 0), b' ');
         assert_eq!(world.get(0, 1), b' ');
+        assert_eq!(world.get(79, 24), b' ');
         Ok(())
     }
 
     #[test]
     fn signed_coordinates_wrap_toroidally() -> std::io::Result<()> {
         let mut world = World::from_source_string("abc\ndef")?;
-        assert_eq!(world.get_signed(-1, -1), b'f');
         world.set_signed(-1, -1, b'!');
-        assert_eq!(world.get(2, 1), b'!');
+        assert_eq!(world.get(79, 24), b'!');
+        assert_eq!(world.get_signed(-1, -1), b'!');
         Ok(())
+    }
+
+    #[test]
+    fn oversized_sources_are_rejected() {
+        let too_wide = "x".repeat(81);
+        let too_tall = (0..26).map(|_| "x").collect::<Vec<_>>().join("\n");
+
+        let err = World::from_source_string(&too_wide)
+            .err()
+            .expect("wide source should error");
+        assert_eq!(err.to_string(), "program exceeds 80 columns");
+
+        let err = World::from_source_string(&too_tall)
+            .err()
+            .expect("tall source should error");
+        assert_eq!(err.to_string(), "program exceeds 25 rows");
     }
 
     #[test]

@@ -17,15 +17,11 @@ impl World {
 
     pub fn from_source_string(source: &str) -> io::Result<World> {
         let mut world: Vec<Vec<u8>> = Vec::new();
-        let lines: Vec<&str> = source.lines().collect();
-        let width = lines.iter().fold(0, |i, s| i.max(s.len()));
-
-        if width == 0 {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidData,
-                "empty befunge program",
-            ));
+        let mut lines: Vec<&str> = source.lines().collect();
+        if lines.is_empty() {
+            lines.push("");
         }
+        let width = lines.iter().fold(1, |i, s| i.max(s.len()));
 
         for line in lines {
             let mut belt = Vec::from(line);
@@ -110,19 +106,22 @@ mod tests {
     }
 
     #[test]
-    fn empty_program_returns_error() {
-        let err = World::from_source_string("")
-            .err()
-            .expect("empty source should error");
-        assert_eq!(err.to_string(), "empty befunge program");
+    fn empty_program_creates_a_blank_cell() -> std::io::Result<()> {
+        let world = World::from_source_string("")?;
+        assert_eq!(world.width(), 1);
+        assert_eq!(world.height(), 1);
+        assert_eq!(world.get(0, 0), b' ');
+        Ok(())
     }
 
     #[test]
-    fn newline_only_program_returns_error() {
-        let err = World::from_source_string("\n\n")
-            .err()
-            .expect("blank source should error");
-        assert_eq!(err.to_string(), "empty befunge program");
+    fn newline_only_program_creates_blank_rows() -> std::io::Result<()> {
+        let world = World::from_source_string("\n\n")?;
+        assert_eq!(world.width(), 1);
+        assert_eq!(world.height(), 2);
+        assert_eq!(world.get(0, 0), b' ');
+        assert_eq!(world.get(0, 1), b' ');
+        Ok(())
     }
 
     #[test]

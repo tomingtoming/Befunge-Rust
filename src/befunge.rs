@@ -422,7 +422,7 @@ mod tests {
     }
 
     #[test]
-    fn divide_by_zero_returns_error() {
+    fn divide_by_zero_is_a_runtime_error() {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();
@@ -441,7 +441,7 @@ mod tests {
     }
 
     #[test]
-    fn modulo_by_zero_returns_error() {
+    fn modulo_by_zero_is_a_runtime_error() {
         let read = Vec::new();
         let mut buf_read = BufReader::new(&read[..]);
         let mut write = Vec::new();

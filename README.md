@@ -9,6 +9,7 @@ Befunge is an esoteric programming language created in 1993 by Chris Pressey. It
 ## Features
 
 - Core Befunge-93 instruction support
+- Fixed 80x25 toroidal program space
 - 2D program space navigation
 - Stack-based operations
 - Random direction execution
@@ -36,6 +37,11 @@ cargo run -- path/to/your/befunge/program  # Required: program file path
 ```
 
 If no file path is provided, or if the program file is unreadable or empty, the interpreter will exit with an error. Division and modulo by zero are reported as runtime errors.
+
+## Compatibility Notes
+
+- Source files are loaded into a fixed 80x25 torus. Programs exceeding 80 columns or 25 rows are rejected.
+- This implementation treats division and modulo by zero as runtime errors instead of using interactive or implementation-defined behavior.
 
 ## Example Befunge Programs
 

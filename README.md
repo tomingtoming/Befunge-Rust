@@ -8,7 +8,7 @@ Befunge is an esoteric programming language created in 1993 by Chris Pressey. It
 
 ## Features
 
-- Full Befunge-93 specification support
+- Core Befunge-93 instruction support
 - 2D program space navigation
 - Stack-based operations
 - Random direction execution
@@ -35,16 +35,16 @@ You can run a Befunge program by providing the path to your Befunge program file
 cargo run -- path/to/your/befunge/program  # Required: program file path
 ```
 
-If no file path is provided, the program will exit with an error.
+If no file path is provided, or if the program file is unreadable or empty, the interpreter will exit with an error. Division and modulo by zero are reported as runtime errors.
 
 ## Example Befunge Programs
 
 ### Hello World
 ```befunge
 >              v
-v  ,,,,,\"Hello\"<
+v  ,,,,,"Hello"<
 >48*,          v
-v,,,,,,\"World!\"<
+v,,,,,,"World!"<
 >25*,@
 ```
 
@@ -72,6 +72,11 @@ To set up the development environment:
 3. Run tests:
    ```bash
    cargo test
+   ```
+4. Run the same checks used in CI:
+   ```bash
+   cargo fmt --all -- --check
+   cargo clippy -- -D warnings
    ```
 
 The primary development branch is `master`.

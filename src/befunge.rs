@@ -4,7 +4,7 @@ use std::io::{self, BufRead, Write};
 
 pub struct Befunge<'w, 'io> {
     world: &'w mut World,
-    stack: Vec<i64>,
+    stack: Vec<i32>,
     direction: Direction,
     x: usize,
     y: usize,
@@ -221,12 +221,12 @@ impl<'w, 'io> Befunge<'w, 'io> {
                         let y = self.stack.pop().unwrap_or(0);
                         let x = self.stack.pop().unwrap_or(0);
                         let v = self.world.get(x as usize, y as usize);
-                        self.stack.push(v as i64); // TODO: Change position to relative
+                        self.stack.push(v as i32); // TODO: Change position to relative
                     }
                     // Ask user for a number and push it
                     '&' => {
                         let token = read_integer_token(self.read)?;
-                        let n = token.parse()?;
+                        let n = token.parse::<i32>()?;
                         self.stack.push(n);
                     }
                     // Ask user for a character and push its ASCII value
@@ -234,7 +234,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
                         let mut buf: [u8; 1] = [0];
                         if let Ok(n) = self.read.read(&mut buf) {
                             if n > 0 {
-                                self.stack.push(i64::from(buf[0]));
+                                self.stack.push(i32::from(buf[0]));
                             }
                         }
                     }
@@ -244,7 +244,7 @@ impl<'w, 'io> Befunge<'w, 'io> {
                 },
                 Mode::AsciiPush => match self.world.get(self.x, self.y) as char {
                     '"' => self.mode = Mode::Interpret,
-                    c => self.stack.push(i64::from(c as u8)),
+                    c => self.stack.push(i32::from(c as u8)),
                 },
             }
             self.forward();

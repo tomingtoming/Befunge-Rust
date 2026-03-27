@@ -28,6 +28,8 @@ cd Befunge-Rust
 cargo build --release
 ```
 
+The release binary will be available at `target/release/befunge_rust`.
+
 ## Usage
 
 You can run a Befunge program by providing the path to your Befunge program file. The file path argument is required:
@@ -36,7 +38,13 @@ You can run a Befunge program by providing the path to your Befunge program file
 cargo run -- path/to/your/befunge/program  # Required: program file path
 ```
 
-If no file path is provided, or if the program file is unreadable or empty, the interpreter will exit with an error. Division and modulo by zero are reported as runtime errors.
+For faster local runs, use the compiled release binary:
+
+```bash
+target/release/befunge_rust examples/hello.bf
+```
+
+If no file path is provided, or if the program file is unreadable, the interpreter will exit with an error. Programs larger than 80 columns or 25 rows are rejected during parsing. A blank file loads as an all-space 80x25 torus and will not terminate on its own. Division and modulo by zero are reported as runtime errors.
 
 ## Compatibility Notes
 
@@ -45,7 +53,9 @@ If no file path is provided, or if the program file is unreadable or empty, the 
 
 ## Example Befunge Programs
 
-### Hello World
+The repository includes runnable sample programs in `examples/`.
+
+### Hello World (`examples/hello.bf`)
 ```befunge
 >              v
 v  ,,,,,"Hello"<
@@ -54,7 +64,7 @@ v,,,,,,"World!"<
 >25*,@
 ```
 
-### Factorial Calculator
+### Factorial Calculator (`examples/factorial.bf`)
 ```befunge
 5 100p:v
 v *g00:_00g.@

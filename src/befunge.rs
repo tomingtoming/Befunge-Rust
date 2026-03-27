@@ -30,6 +30,29 @@ fn invalid_arithmetic_operation(message: &'static str) -> Box<dyn Error> {
     io::Error::new(io::ErrorKind::InvalidData, message).into()
 }
 
+fn read_integer_token(read: &mut dyn BufRead) -> io::Result<String> {
+    let mut buf = [0_u8; 1];
+    let mut token = Vec::new();
+
+    loop {
+        match read.read(&mut buf)? {
+            0 if token.is_empty() => {
+                return Err(io::Error::new(
+                    io::ErrorKind::UnexpectedEof,
+                    "expected integer input",
+                ));
+            }
+            0 => break,
+            _ if token.is_empty() && buf[0].is_ascii_whitespace() => continue,
+            _ if !token.is_empty() && buf[0].is_ascii_whitespace() => break,
+            _ => token.push(buf[0]),
+        }
+    }
+
+    String::from_utf8(token)
+        .map_err(|err| io::Error::new(io::ErrorKind::InvalidData, err.utf8_error()))
+}
+
 impl<'w, 'io> Befunge<'w, 'io> {
     pub fn new(
         world: &'w mut World,
@@ -202,9 +225,8 @@ impl<'w, 'io> Befunge<'w, 'io> {
                     }
                     // Ask user for a number and push it
                     '&' => {
-                        let mut line = String::new();
-                        self.read.read_line(&mut line)?;
-                        let n = line.trim().parse()?;
+                        let token = read_integer_token(self.read)?;
+                        let n = token.parse()?;
                         self.stack.push(n);
                     }
                     // Ask user for a character and push its ASCII value
@@ -512,6 +534,26 @@ mod tests {
         befunge.run()?;
         assert_eq!(befunge.stack, []);
         assert_eq!(String::from_utf8_lossy(&write[..]), "55 3");
+        Ok(())
+    }
+
+    #[test]
+    fn numeric_input_commands_are_whitespace_delimited() -> Result<(), Box<dyn Error>> {
+        let read = Vec::from("12 34\n".as_bytes());
+        let mut buf_read = BufReader::new(&read[..]);
+        let mut write = Vec::new();
+        let mut world = World::from_source_string("&&..@")?;
+        let mut befunge = Befunge::new(
+            &mut world,
+            0,
+            0,
+            Direction::Right,
+            &mut buf_read,
+            &mut write,
+        );
+        befunge.run()?;
+        assert_eq!(befunge.stack, []);
+        assert_eq!(String::from_utf8_lossy(&write[..]), "34 12 ");
         Ok(())
     }
 }

@@ -3,6 +3,12 @@ name = "befunge_rust"
 version = "1.0.0"
 authors = ["toming <tomingtoming@gmail.com>"]
 edition = "2021"
+description = "A Befunge-93 interpreter implemented in Rust"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/tomingtoming/Befunge-Rust"
+keywords = ["befunge", "interpreter", "esolang"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 rand = "0.5.0-pre.1"
